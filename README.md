@@ -1,57 +1,65 @@
-# noScribe Analysis Tools: Excel & Visualizations
+# noScribe Analysis Pipeline: Research Edition
 
-This repository contains custom Python scripts designed to take raw `noScribe` AI transcripts and automatically generate structured Excel databases and high-resolution visual graphs.
+This repository contains an expanded analytical toolkit for the `noScribe` transcription engine. These tools transform raw time-aligned transcripts into structured research databases, quantitative metrics, and publication-ready visualizations.
 
-These tools are built to help researchers and students instantly move from qualitative text data to quantitative visual analysis of conversational dynamics (like interruptions, hesitations, and dominate speaking time).
+## 🚀 Key Features
 
-## What's Included?
-1. **`parse_to_excel.py`:** Reads a raw `.txt` transcript and generates a color-coded, heavily formatted Excel file containing a turn-by-turn breakdown and a mathematical **Results Dashboard**.
-2. **`visualize_data.py`:** Ingests the output from the Excel file to generate two presentation-ready graphs:
-   * **The Conversational Timeline:** A rhythmic bar chart of word counts per turn.
-   * **The Friction Heatmap:** A visual scatterplot mapping the location and intensity of conversational disfluencies and silences.
-3. **`download_audio.sh`:** A quick shell script wrapper for `yt-dlp` to easily pull pristine `.mp3` files down from YouTube links for transcription.
+### 1. 🔧 Integrated Audio Preparation
+A dedicated module to source and prepare high-quality audio before transcription.
+* **YouTube Downloader**: Easily pull audio from YouTube links.
+* **Format Standardization**: Convert WAV, FLAC, M4A, and MP4 to optimized MP3.
+* **Volume Normalization**: Ensure consistent playback loudness across different environments.
+* **Silence Splitting**: Automatically detect and split recordings at silence gaps.
 
-## Prerequisites
-To use these tools, you need the base transcription software installed.
-1. Download and install [noScribe](https://github.com/kaixxx/noScribe) locally.
-2. Ensure you have activated your `noScribe` python virtual environment.
-3. Install the data science libraries we need for the visualization scripts:
-   ```bash
-   pip install pandas openpyxl matplotlib seaborn
-   ```
+### 2. 📊 Advanced Lexical Analysis
+Moving beyond basic token counts, this edition computes complex linguistic metrics per speaker:
+* **Lexical Diversity**: Type-Token Ratio (TTR) and Measure of Textual Lexical Diversity (MTLD).
+* **Stylometrics**: Flesch-Kincaid Readability scores to assess discourse complexity.
+* **Conversational Friction**: Tracking disfluencies (uh/um), overlap frequency, and pause patterns.
 
-## Quick Start Guide
+### 3. 📉 High-Granularity Visualizations
+Turn your data into insights with presentation-ready charts:
+* **Conversational Timeline**: Word count and turn rhythm mapping.
+* **Interaction Heatmaps**: Visual mapping of disfluencies and silences over time.
+* **Speaker Balance**: Dynamic pie charts of words and turns.
+* **Turn-Taking Matrices**: Visualizing "who responds to whom" (conversational topology).
+* **Word Clouds**: Automated vocabulary visualization per speaker.
 
-Drop these three files into your main `noScribe` folder alongside `noScribe.py`.
-
-### 1. Download Audio (Optional)
-If you have a YouTube link you want to analyze, use the shell script:
-```bash
-./download_audio.sh "https://www.youtube.com/watch?v=YOUR_LINK"
-```
-
-### 2. Transcribe Audio
-Use `noScribe` via the terminal to transcribe the file in the background (preventing the GUI from crashing on massive files):
-```bash
-python3 noScribe.py videos/your_file.mp3 transcripts/your_output.txt --no-gui
-```
-
-### 3. Generate the Excel Database
-Convert the raw AI text into the color-coded Excel ledger:
-```bash
-python3 parse_to_excel.py transcripts/your_output.txt exports/your_analysis.xlsx
-```
-
-### 4. Generate the Visualization Graphs
-Draw the Timeline and Heatmap using the data from the Excel file:
-```bash
-python3 visualize_data.py exports/your_analysis.xlsx analysis/graphs_folder
-```
-
-## Reading the Output
-- **Excel:** Open the `.xlsx` file. The first tab is a mathematical summary of who dominated the conversation, how many times they paused, and how many times they interrupted. The second tab is the full color-coded transcript.
-- **Timeline Graph:** Taller bars mean more words were spoken before the other person interrupted. Colors dictate the speaker.
-- **Heatmap Graph:** Red circles are filler language (uh/um). Yellow squares are intense silences (2+ seconds). The higher up and larger the shape, the more times it happened rapidly in a single turn.
+### 4. 📄 Academic Workflow (LaTeX Export)
+Export your findings directly into LaTeX documents with a single click.
+* **Pre-formatted Tables**: Uses the `booktabs` package for professional tables.
+* **Figure Stubs**: Ready-to-use LaTeX code for all generated plots and word clouds.
 
 ---
-*Built for educational and research analysis of high-stakes conversational audio.*
+
+## 🛠️ Installation & Setup
+
+1. **Install noScribe**: Ensure you have the base [noScribe](https://github.com/kaixxx/noScribe) software installed.
+2. **Dependencies**:
+   ```bash
+   pip install pandas openpyxl matplotlib seaborn lexicalrichness textstat wordcloud pydub
+   ```
+3. **External Tools**: Ensure `ffmpeg` is installed on your system (required for audio processing).
+
+---
+
+## 🎮 How to Use
+
+### Integrated GUI (Recommended)
+Launch the new research pipeline interface:
+```bash
+python3 pipeline_gui.py
+```
+This integrated window allows you to move through every step:
+1. **Download/Prepare Audio** (Source your files)
+2. **Transcribe** (Generate the raw text)
+3. **Excel + Theme** (Generate metrics and database)
+4. **Graphs** (Generate visualizations and word clouds)
+
+### Command Line Usage
+For batch processing, the scripts can be run individually:
+* **Excel**: `python3 analysis/parse_to_excel.py input.txt output.xlsx --lexical --latex`
+* **Graphs**: `python3 analysis/visualize_data.py input.xlsx output_folder --all`
+
+---
+*Developed for researchers and students focused on quantitative linguistics and conversation analysis.*
