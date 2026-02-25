@@ -13,8 +13,10 @@ def create_visualizations(excel_path, output_dir):
     # Add a Turn Number column for the X-axis
     df['Turn'] = range(1, len(df) + 1)
     
-    # Format Obama and Maron colors
-    color_palette = {"Obama": "#4F81BD", "Maron": "#9BBB59"}
+    # Dynamically assign colors to all unique speakers
+    speakers = list(df['Speaker'].unique())
+    colors = plt_sns.color_palette("husl", len(speakers)).as_hex()
+    color_palette = dict(zip(speakers, colors))
     
     # Ensure output directory exists
     os.makedirs(output_dir, exist_ok=True)
@@ -72,7 +74,7 @@ def create_visualizations(excel_path, output_dir):
     # Add a faint background line showing who was speaking
     bg_alpha = 0.1 if num_turns < 50 else 0.03 # Make the background lines much fainter on dense plots
     for i, row in df.iterrows():
-        color = "#4F81BD" if row['Speaker'] == "Obama" else "#9BBB59"
+        color = color_palette.get(row['Speaker'], "#CCCCCC")
         plt.axvspan(row['Turn']-0.5, row['Turn']+0.5, color=color, alpha=bg_alpha)
         
     plt.title('Conversational Friction: Where Hesitations and Pauses Occurred', fontsize=16, pad=20)

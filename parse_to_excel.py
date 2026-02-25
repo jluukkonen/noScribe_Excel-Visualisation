@@ -37,7 +37,7 @@ def parse_transcript(file_path):
             # Save previous turn if it exists
             if current_speaker is not None:
                 data.append({
-                    "Speaker": "Maron" if current_speaker == "S01" else ("Obama" if current_speaker == "S00" else current_speaker),
+                    "Speaker": current_speaker,
                     "Text": current_text.strip()
                 })
             
@@ -52,7 +52,7 @@ def parse_transcript(file_path):
     # Append the last turn
     if current_speaker is not None:
         data.append({
-            "Speaker": "Maron" if current_speaker == "S01" else ("Obama" if current_speaker == "S00" else current_speaker),
+            "Speaker": current_speaker,
             "Text": current_text.strip()
         })
         
@@ -85,8 +85,6 @@ def apply_excel_styling(output_file, df):
     # --- 1. Define Visual Styles ---
     header_fill = PatternFill(start_color="4F81BD", end_color="4F81BD", fill_type="solid")
     header_font = Font(color="FFFFFF", bold=True)
-    obama_fill = PatternFill(start_color="E6F2FF", end_color="E6F2FF", fill_type="solid") # Light Blue
-    maron_fill = PatternFill(start_color="EBF1DE", end_color="EBF1DE", fill_type="solid") # Light Green
     wrap_alignment = Alignment(wrap_text=True, vertical="top")
     top_alignment = Alignment(vertical="top")
     
@@ -115,18 +113,13 @@ def apply_excel_styling(output_file, df):
         for col_idx in [1, 3, 4, 5, 6, 7]:
             ws.cell(row=row_idx, column=col_idx).alignment = top_alignment
 
-        if speaker_name == "Obama":
-            for col_idx in range(1, ws.max_column + 1):
-                ws.cell(row=row_idx, column=col_idx).fill = obama_fill
-        elif speaker_name == "Maron":
-            for col_idx in range(1, ws.max_column + 1):
-                ws.cell(row=row_idx, column=col_idx).fill = maron_fill
+        # Optional: Add zebra striping here if desired in the future
                 
     # --- 5. CREATE THE RESULTS SHEET ---
     ws_results = wb.create_sheet(title="Results Summary", index=0)
     
-    # Calculate stats
-    speakers = ["Obama", "Maron"]
+    # Calculate stats for all speakers
+    speakers = list(df["Speaker"].unique())
     stats = {}
     for s in speakers:
         speaker_df = df[df["Speaker"] == s]
@@ -134,7 +127,7 @@ def apply_excel_styling(output_file, df):
             "Total Turns": len(speaker_df),
             "Total Words": int(speaker_df["Word Count"].sum()),
             "Avg Words per Turn": round(speaker_df["Word Count"].mean(), 1) if len(speaker_df) > 0 else 0,
-            "Total Overlaps Initiated/Involved": len(speaker_df[speaker_df["Contains Overlap?"] == "Yes"]),
+            "Total Overlaps": len(speaker_df[speaker_df["Contains Overlap?"] == "Yes"]),
             "Total Short Pauses (.)": int(speaker_df["Short Pauses"].sum()),
             "Total Long Pauses (..)": int(speaker_df["Long Pauses"].sum()),
             "Total Disfluencies (uh/yeah)": int(speaker_df["Disfluencies (uh/um/yeah...)"].sum()),
@@ -151,22 +144,21 @@ def apply_excel_styling(output_file, df):
     title_cell.fill = title_fill
     title_cell.alignment = Alignment(horizontal="center", vertical="center")
     
-    # Write Headers
+    # Write Headers Dynamically
     sub_header_font = Font(bold=True)
-    ws_results.cell(row=4, column=3, value="BARACK OBAMA").font = sub_header_font
-    ws_results.cell(row=4, column=3).fill = obama_fill
-    ws_results.cell(row=4, column=3).alignment = Alignment(horizontal="center")
-    
-    ws_results.cell(row=4, column=4, value="MARC MARON").font = sub_header_font
-    ws_results.cell(row=4, column=4).fill = maron_fill
-    ws_results.cell(row=4, column=4).alignment = Alignment(horizontal="center")
+    col_idx = 3
+    for s in speakers:
+        head_cell = ws_results.cell(row=4, column=col_idx, value=str(s).upper())
+        head_cell.font = sub_header_font
+        head_cell.alignment = Alignment(horizontal="center")
+        col_idx += 1
 
     # Metrics Layout
     metrics = [
         ("Total Speaking Turns", "Total Turns"),
         ("Total Words Spoken", "Total Words"),
         ("Average Words per Turn", "Avg Words per Turn"),
-        ("Overlapping Statements", "Total Overlaps Initiated/Involved"),
+        ("Overlapping Statements", "Total Overlaps"),
         ("Short Pauses (.)", "Total Short Pauses (.)"),
         ("Long Pauses (..)", "Total Long Pauses (..)"),
         ("Disfluencies (uh, um, yeah)", "Total Disfluencies (uh/yeah)")
@@ -181,17 +173,12 @@ def apply_excel_styling(output_file, df):
         label_cell.font = Font(bold=True)
         label_cell.alignment = Alignment(horizontal="right")
         
-        # Obama Stat
-        ob_cell = ws_results.cell(row=current_row, column=3, value=stats["Obama"][dict_key])
-        ob_cell.fill = obama_fill
-        ob_cell.border = thin_border
-        ob_cell.alignment = Alignment(horizontal="center")
-        
-        # Maron Stat
-        mar_cell = ws_results.cell(row=current_row, column=4, value=stats["Maron"][dict_key])
-        mar_cell.fill = maron_fill
-        mar_cell.border = thin_border
-        mar_cell.alignment = Alignment(horizontal="center")
+        col_idx = 3
+        for s in speakers:
+            stat_cell = ws_results.cell(row=current_row, column=col_idx, value=stats[s][dict_key])
+            stat_cell.border = thin_border
+            stat_cell.alignment = Alignment(horizontal="center")
+            col_idx += 1
         
         current_row += 2 # Double space for presentation
 
